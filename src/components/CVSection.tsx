@@ -119,7 +119,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className="min-h-[50px] border border-dashed border-gray-200 hover:border-gray-400 transition-colors"
+            className="min-h-screen border border-dashed border-gray-200 hover:border-gray-400 transition-colors"
             style={{
               backgroundColor: backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
               padding,
