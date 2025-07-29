@@ -15,6 +15,7 @@ interface Section {
     backgroundColor: string;
     padding: string;
     margin: string;
+    border: string;
   };
   children: Section[];
 }
@@ -32,6 +33,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
   const [backgroundColor, setBackgroundColor] = useState(section.styles.backgroundColor);
   const [padding, setPadding] = useState(section.styles.padding);
   const [margin, setMargin] = useState(section.styles.margin);
+  const [border, setBorder] = useState(section.styles.border || 'none');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInsertText = () => {
@@ -51,6 +53,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
     setBackgroundColor(section.styles.backgroundColor);
     setPadding(section.styles.padding);
     setMargin(section.styles.margin);
+    setBorder(section.styles.border || 'none');
     setShowStyleDialog(true);
   };
 
@@ -59,7 +62,8 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
       styles: {
         backgroundColor,
         padding,
-        margin
+        margin,
+        border
       }
     });
     setShowStyleDialog(false);
@@ -119,11 +123,12 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className="min-h-screen border border-dashed border-gray-200 hover:border-gray-400 transition-colors"
+            className="min-h-screen hover:bg-black/5 transition-colors cursor-pointer"
             style={{
               backgroundColor: backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
               padding,
-              margin
+              margin,
+              border: border === 'none' ? 'none' : border
             }}
           >
             {renderContent()}
@@ -239,6 +244,15 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
                 value={margin}
                 onChange={(e) => setMargin(e.target.value)}
                 placeholder="e.g., 10px or 0.5rem"
+              />
+            </div>
+            <div>
+              <Label htmlFor="border">Border</Label>
+              <Input
+                id="border"
+                value={border}
+                onChange={(e) => setBorder(e.target.value)}
+                placeholder="e.g., 1px solid #000 or none"
               />
             </div>
             <div className="flex gap-2 justify-end">
