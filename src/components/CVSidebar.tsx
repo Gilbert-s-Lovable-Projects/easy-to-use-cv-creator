@@ -61,7 +61,9 @@ export const CVSidebar = ({ user, selectedCVId, onSelectCV }: CVSidebarProps) =>
           backgroundColor: 'transparent',
           padding: '20px',
           margin: '0px',
-          border: 'none'
+          borderStyle: 'none',
+          borderWidth: '1px',
+          borderColor: '#000000'
         },
         children: []
       }]

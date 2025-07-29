@@ -12,7 +12,9 @@ interface Section {
     backgroundColor: string;
     padding: string;
     margin: string;
-    border: string;
+    borderStyle: string;
+    borderWidth: string;
+    borderColor: string;
   };
   children: Section[];
 }
@@ -82,7 +84,9 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
         backgroundColor: 'transparent',
         padding: '10px',
         margin: '0px',
-        border: 'none'
+        borderStyle: 'none',
+        borderWidth: '1px',
+        borderColor: '#000000'
       },
       children: []
     };

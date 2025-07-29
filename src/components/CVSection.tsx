@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Type, Image, Palette, SplitSquareHorizontal, SplitSquareVertical } from 'lucide-react';
 
 interface Section {
@@ -15,7 +16,9 @@ interface Section {
     backgroundColor: string;
     padding: string;
     margin: string;
-    border: string;
+    borderStyle: string;
+    borderWidth: string;
+    borderColor: string;
   };
   children: Section[];
 }
@@ -33,7 +36,9 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
   const [backgroundColor, setBackgroundColor] = useState(section.styles.backgroundColor);
   const [padding, setPadding] = useState(section.styles.padding);
   const [margin, setMargin] = useState(section.styles.margin);
-  const [border, setBorder] = useState(section.styles.border || 'none');
+  const [borderStyle, setBorderStyle] = useState(section.styles.borderStyle || 'none');
+  const [borderWidth, setBorderWidth] = useState(section.styles.borderWidth || '1px');
+  const [borderColor, setBorderColor] = useState(section.styles.borderColor || '#000000');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInsertText = () => {
@@ -53,7 +58,9 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
     setBackgroundColor(section.styles.backgroundColor);
     setPadding(section.styles.padding);
     setMargin(section.styles.margin);
-    setBorder(section.styles.border || 'none');
+    setBorderStyle(section.styles.borderStyle || 'none');
+    setBorderWidth(section.styles.borderWidth || '1px');
+    setBorderColor(section.styles.borderColor || '#000000');
     setShowStyleDialog(true);
   };
 
@@ -63,7 +70,9 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
         backgroundColor,
         padding,
         margin,
-        border
+        borderStyle,
+        borderWidth,
+        borderColor
       }
     });
     setShowStyleDialog(false);
@@ -128,7 +137,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
               backgroundColor: backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
               padding,
               margin,
-              border: border === 'none' ? 'none' : border
+              border: borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderColor}`
             }}
           >
             {renderContent()}
@@ -247,13 +256,44 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
               />
             </div>
             <div>
-              <Label htmlFor="border">Border</Label>
-              <Input
-                id="border"
-                value={border}
-                onChange={(e) => setBorder(e.target.value)}
-                placeholder="e.g., 1px solid #000 or none"
-              />
+              <Label htmlFor="border-style">Border Style</Label>
+              <Select value={borderStyle} onValueChange={setBorderStyle}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select border style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="solid">Solid</SelectItem>
+                  <SelectItem value="dashed">Dashed</SelectItem>
+                  <SelectItem value="dotted">Dotted</SelectItem>
+                  <SelectItem value="double">Double</SelectItem>
+                  <SelectItem value="groove">Groove</SelectItem>
+                  <SelectItem value="ridge">Ridge</SelectItem>
+                  <SelectItem value="inset">Inset</SelectItem>
+                  <SelectItem value="outset">Outset</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="border-width">Border Width</Label>
+                <Input
+                  id="border-width"
+                  value={borderWidth}
+                  onChange={(e) => setBorderWidth(e.target.value)}
+                  placeholder="e.g., 1px, 2px"
+                />
+              </div>
+              <div>
+                <Label htmlFor="border-color">Border Color</Label>
+                <Input
+                  id="border-color"
+                  type="color"
+                  value={borderColor}
+                  onChange={(e) => setBorderColor(e.target.value)}
+                  className="w-full"
+                />
+              </div>
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowStyleDialog(false)}>
