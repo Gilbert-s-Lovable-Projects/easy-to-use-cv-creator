@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Type, Image, Palette, SplitSquareHorizontal, SplitSquareVertical } from 'lucide-react';
+import tinycolor from "tinycolor2";
 
 interface Section {
   id: string;
@@ -33,13 +34,19 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
   const [showTextDialog, setShowTextDialog] = useState(false);
   const [showStyleDialog, setShowStyleDialog] = useState(false);
   const [textContent, setTextContent] = useState(section.content);
-  const [backgroundColor, setBackgroundColor] = useState(section.styles.backgroundColor);
+  const [backgroundColor, setBackgroundColor] = useState(section.styles.backgroundColor || '#000000FF');
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1.0);
+  const [isHoveredByMouse, setIsHoveredByMouse] = useState(false);
   const [padding, setPadding] = useState(section.styles.padding);
   const [margin, setMargin] = useState(section.styles.margin);
   const [borderStyle, setBorderStyle] = useState(section.styles.borderStyle || 'none');
   const [borderWidth, setBorderWidth] = useState(section.styles.borderWidth || '1px');
   const [borderColor, setBorderColor] = useState(section.styles.borderColor || '#000000');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const finalBackgroundColor = isHoveredByMouse
+    ? tinycolor(backgroundColor).darken(20).toString()
+    : backgroundColor;
 
   const handleInsertText = () => {
     setTextContent(section.content);
@@ -134,11 +141,14 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
           <div
             className="min-h-screen hover:bg-black/10 transition-colors duration-200 cursor-pointer"
             style={{
-              backgroundColor: backgroundColor === 'transparent' ? 'transparent' : backgroundColor,
+              backgroundColor: finalBackgroundColor,
+              opacity: backgroundOpacity,
               padding,
               margin,
-              border: borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderColor}`
+              border: borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderColor}`,
             }}
+            onMouseEnter={ () => setIsHoveredByMouse(true)}
+            onMouseLeave={ () => setIsHoveredByMouse(false)}
           >
             {renderContent()}
             
@@ -224,17 +234,19 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
                 <Input
                   id="bg-color"
                   type="color"
-                  value={backgroundColor === 'transparent' ? '#ffffff' : backgroundColor}
+                  value={backgroundColor === 'transparent' ? '#ffffffff' : backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
                   className="w-20"
                 />
-                <Button
-                  variant="outline"
-                  onClick={() => setBackgroundColor('transparent')}
-                  className="flex-1"
-                >
-                  Transparent
-                </Button>
+              </div>
+              <Label htmlFor="bg-color">Background Opacity</Label>
+              <div className="flex gap-2">
+                <Input
+                  id = "bg-opacity"
+                  type = "range" 
+                  min = "0.0" max = "1.0" step = "0.01" value={backgroundOpacity}
+                  onChange={(e) => setBackgroundOpacity(e.target.value)}
+                />
               </div>
             </div>
             <div>
