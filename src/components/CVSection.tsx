@@ -22,6 +22,7 @@ interface Section {
     borderColor: string;
   };
   children: Section[];
+  flexDirection?: 'horizontal' | 'vertical';
 }
 
 interface CVSectionProps {
@@ -150,8 +151,8 @@ export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, ca
     <>
       <ContextMenu>
         <ContextMenuTrigger>
-          <div
-            className="min-h-screen transition-colors duration-200 cursor-pointer"
+           <div
+            className={`transition-colors duration-200 cursor-pointer ${section.children.length > 0 && section.flexDirection ? 'flex' : ''} ${section.flexDirection === 'horizontal' ? 'flex-row h-full' : section.flexDirection === 'vertical' ? 'flex-col' : 'min-h-screen'}`}
             style={{
               backgroundColor: finalBackgroundColor,
               opacity: backgroundOpacity,
@@ -174,17 +175,25 @@ export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, ca
             
             {/* Render children sections */}
             {section.children.length > 0 && (
-              <div className="space-y-2">
+              <div 
+                className={section.flexDirection === 'horizontal' ? 'flex' : 'flex flex-col'}
+                style={{ height: section.flexDirection === 'horizontal' ? '100%' : 'auto' }}
+              >
                 {section.children.map((child) => (
-                  <CVSection
+                  <div 
                     key={child.id}
-                    section={child}
-                    onUpdate={onUpdate}
-                    onAddSection={onAddSection}
-                    onRemoveSection={onRemoveSection}
-                    canRemove={true}
-                    onMouseEnterOrExit={onMouseEnterOrExitChildSection}
-                  />
+                    className="flex-1"
+                    style={{ minHeight: section.flexDirection === 'vertical' ? '0' : 'auto' }}
+                  >
+                    <CVSection
+                      section={child}
+                      onUpdate={onUpdate}
+                      onAddSection={onAddSection}
+                      onRemoveSection={onRemoveSection}
+                      canRemove={true}
+                      onMouseEnterOrExit={onMouseEnterOrExitChildSection}
+                    />
+                  </div>
                 ))}
               </div>
             )}

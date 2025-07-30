@@ -17,6 +17,7 @@ interface Section {
     borderColor: string;
   };
   children: Section[];
+  flexDirection?: 'horizontal' | 'vertical';
 }
 
 interface CVData {
@@ -126,26 +127,54 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
       children: []
     };
 
-    const addSectionAsSibling = (sections: Section[], targetId: string): Section[] => {
-      // Check if target is in current level
-      const targetIndex = sections.findIndex(s => s.id === targetId);
-      if (targetIndex !== -1) {
-        // Insert new section as sibling
-        const newSections = [...sections];
-        newSections.splice(targetIndex + 1, 0, newSection);
-        return newSections;
-      }
-      
-      // Search in children
-      return sections.map(section => ({
-        ...section,
-        children: addSectionAsSibling(section.children, targetId)
-      }));
+    const splitSection = (sections: Section[], targetId: string): Section[] => {
+      return sections.map(section => {
+        if (section.id === targetId) {
+          // Create a new container that will hold both the original and new section
+          const containerSection: Section = {
+            id: crypto.randomUUID(),
+            type: 'container',
+            content: '',
+            styles: {
+              ...section.styles,
+            },
+            flexDirection: direction,
+            children: [
+              {
+                ...section,
+                id: crypto.randomUUID(), // Give original section a new ID
+                styles: {
+                  ...section.styles,
+                  margin: '0px', // Reset margin for flex children
+                }
+              },
+              {
+                ...newSection,
+                styles: {
+                  ...newSection.styles,
+                  margin: '0px', // Reset margin for flex children
+                }
+              }
+            ]
+          };
+          
+          return containerSection;
+        }
+        
+        if (section.children.length > 0) {
+          return {
+            ...section,
+            children: splitSection(section.children, targetId)
+          };
+        }
+        
+        return section;
+      });
     };
 
     const updatedData = {
       ...cvData,
-      sections: addSectionAsSibling(cvData.sections, parentId)
+      sections: splitSection(cvData.sections, parentId)
     };
     saveCVData(updatedData);
   };
