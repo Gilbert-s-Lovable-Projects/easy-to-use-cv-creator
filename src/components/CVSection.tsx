@@ -139,7 +139,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className="min-h-screen hover:bg-black/10 transition-colors duration-200 cursor-pointer"
+            className="min-h-screen transition-colors duration-200 cursor-pointer"
             style={{
               backgroundColor: finalBackgroundColor,
               opacity: backgroundOpacity,
@@ -245,7 +245,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
                   id = "bg-opacity"
                   type = "range" 
                   min = "0.0" max = "1.0" step = "0.01" value={backgroundOpacity}
-                  onChange={(e) => setBackgroundOpacity(e.target.value)}
+                  onChange={(e) => setBackgroundOpacity(parseFloat(e.target.value))}
                 />
               </div>
             </div>
