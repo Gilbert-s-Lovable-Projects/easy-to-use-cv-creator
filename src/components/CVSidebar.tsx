@@ -1,10 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Plus, FileText, LogOut } from 'lucide-react';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Plus, FileText, LogOut, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -22,6 +25,7 @@ interface CVSidebarProps {
 
 export const CVSidebar = ({ user, selectedCVId, onSelectCV }: CVSidebarProps) => {
   const [cvs, setCVs] = useState<CV[]>([]);
+  const [cvToDelete, setCVToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     // Load CVs from localStorage
@@ -76,6 +80,32 @@ export const CVSidebar = ({ user, selectedCVId, onSelectCV }: CVSidebarProps) =>
     });
   };
 
+  const handleDeleteCV = (cvId: string) => {
+    setCVToDelete(cvId);
+  };
+
+  const confirmDeleteCV = () => {
+    if (cvToDelete) {
+      const updatedCVs = cvs.filter(cv => cv.id !== cvToDelete);
+      saveCVs(updatedCVs);
+      
+      // Remove CV data from localStorage
+      localStorage.removeItem(`cv_${cvToDelete}`);
+      
+      // If the deleted CV was selected, clear selection
+      if (selectedCVId === cvToDelete) {
+        onSelectCV('');
+      }
+      
+      toast({
+        title: "Success",
+        description: "CV deleted successfully!"
+      });
+      
+      setCVToDelete(null);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -86,79 +116,111 @@ export const CVSidebar = ({ user, selectedCVId, onSelectCV }: CVSidebarProps) =>
   };
 
   return (
-    <div className="h-full bg-muted/30 border-r flex flex-col">
-      {/* User Profile Section */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-3 mb-3">
-          <Avatar>
-            <AvatarImage src={user.user_metadata?.avatar_url} />
-            <AvatarFallback>{getUserInitials()}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">
-              {user.user_metadata?.full_name || user.email}
-            </p>
-            <p className="text-xs text-muted-foreground truncate">
-              {user.email}
-            </p>
+    <>
+      <div className="h-full bg-muted/30 border-r flex flex-col">
+        {/* User Profile Section */}
+        <div className="p-4 border-b">
+          <div className="flex items-center gap-3 mb-3">
+            <Avatar>
+              <AvatarImage src={user.user_metadata?.avatar_url} />
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {user.user_metadata?.full_name || user.email}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {user.email}
+              </p>
+            </div>
           </div>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleSignOut}
-          className="w-full"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
-
-      {/* CV Management Section */}
-      <div className="flex-1 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">My CVs</h2>
-          <Button size="sm" onClick={createNewCV}>
-            <Plus className="h-4 w-4 mr-2" />
-            New CV
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleSignOut}
+            className="w-full"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
           </Button>
         </div>
 
-        <div className="space-y-2">
-          {cvs.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                <FileText className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground mb-3">
-                  No CVs yet. Create your first CV to get started.
-                </p>
-                <Button size="sm" onClick={createNewCV}>
-                  Create CV
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            cvs.map((cv) => (
-              <Card 
-                key={cv.id}
-                className={`cursor-pointer transition-colors hover:bg-accent ${
-                  selectedCVId === cv.id ? 'bg-accent border-primary' : ''
-                }`}
-                onClick={() => onSelectCV(cv.id)}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">{cv.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">
-                    Modified {cv.lastModified.toLocaleDateString()}
+        {/* CV Management Section */}
+        <div className="flex-1 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">My CVs</h2>
+            <Button size="sm" onClick={createNewCV}>
+              <Plus className="h-4 w-4 mr-2" />
+              New CV
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            {cvs.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                  <FileText className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">
+                    No CVs yet. Create your first CV to get started.
                   </p>
+                  <Button size="sm" onClick={createNewCV}>
+                    Create CV
+                  </Button>
                 </CardContent>
               </Card>
-            ))
-          )}
+            ) : (
+              cvs.map((cv) => (
+                <ContextMenu key={cv.id}>
+                  <ContextMenuTrigger>
+                    <Card 
+                      className={`cursor-pointer transition-colors hover:bg-accent ${
+                        selectedCVId === cv.id ? 'bg-accent border-primary' : ''
+                      }`}
+                      onClick={() => onSelectCV(cv.id)}
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">{cv.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-xs text-muted-foreground">
+                          Modified {cv.lastModified.toLocaleDateString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem 
+                      onClick={() => handleDeleteCV(cv.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete CV
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
+              ))
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!cvToDelete} onOpenChange={() => setCVToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete CV</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this CV? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCV} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };

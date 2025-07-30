@@ -73,6 +73,25 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
     saveCVData(updatedData);
   };
 
+  const removeSection = (sectionId: string) => {
+    if (!cvData) return;
+    
+    const removeSectionRecursive = (sections: Section[]): Section[] => {
+      return sections
+        .filter(section => section.id !== sectionId)
+        .map(section => ({
+          ...section,
+          children: removeSectionRecursive(section.children)
+        }));
+    };
+
+    const updatedData = {
+      ...cvData,
+      sections: removeSectionRecursive(cvData.sections)
+    };
+    saveCVData(updatedData);
+  };
+
   const addSection = (parentId: string, direction: 'horizontal' | 'vertical') => {
     if (!cvData) return;
     
@@ -118,6 +137,10 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDummyMouseEnterOrExit = () => {
+    // Dummy function for root sections
   };
 
   if (!selectedCVId) {
@@ -167,6 +190,8 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
               section={section}
               onUpdate={updateSection}
               onAddSection={addSection}
+              onRemoveSection={removeSection}
+              onMouseEnterOrExit={handleDummyMouseEnterOrExit}
             />
           ))}
         </div>

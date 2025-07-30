@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from '@/components/ui/context-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Type, Image, Palette, SplitSquareHorizontal, SplitSquareVertical } from 'lucide-react';
+import { Type, Image, Palette, SplitSquareHorizontal, SplitSquareVertical, Trash2 } from 'lucide-react';
 import tinycolor from "tinycolor2";
 
 interface Section {
@@ -28,10 +28,11 @@ interface CVSectionProps {
   section: Section;
   onUpdate: (sectionId: string, updates: Partial<Section>) => void;
   onAddSection: (parentId: string, direction: 'horizontal' | 'vertical') => void;
+  onRemoveSection: (sectionId: string) => void;
   onMouseEnterOrExit: (state: 'mouseEnter' | 'mouseExit') => void;
 }
 
-export const CVSection = ({ section, onUpdate, onAddSection, onMouseEnterOrExit }: CVSectionProps) => {
+export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, onMouseEnterOrExit }: CVSectionProps) => {
   const [showTextDialog, setShowTextDialog] = useState(false);
   const [showStyleDialog, setShowStyleDialog] = useState(false);
   const [textContent, setTextContent] = useState(section.content);
@@ -110,6 +111,10 @@ export const CVSection = ({ section, onUpdate, onAddSection, onMouseEnterOrExit 
     }
   };
 
+  const handleRemoveSection = () => {
+    onRemoveSection(section.id);
+  };
+
   const renderContent = () => {
     switch (section.type) {
       case 'text':
@@ -175,6 +180,7 @@ export const CVSection = ({ section, onUpdate, onAddSection, onMouseEnterOrExit 
                     section={child}
                     onUpdate={onUpdate}
                     onAddSection={onAddSection}
+                    onRemoveSection={onRemoveSection}
                     onMouseEnterOrExit={onMouseEnterOrExitChildSection}
                   />
                 ))}
@@ -203,6 +209,11 @@ export const CVSection = ({ section, onUpdate, onAddSection, onMouseEnterOrExit 
           <ContextMenuItem onClick={() => onAddSection(section.id, 'vertical')}>
             <SplitSquareVertical className="h-4 w-4 mr-2" />
             Split Vertical
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={handleRemoveSection} className="text-destructive focus:text-destructive">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Remove Section
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
