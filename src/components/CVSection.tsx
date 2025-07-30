@@ -147,8 +147,14 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
               margin,
               border: borderStyle === 'none' ? 'none' : `${borderWidth} ${borderStyle} ${borderColor}`,
             }}
-            onMouseEnter={ () => setIsHoveredByMouse(true)}
-            onMouseLeave={ () => setIsHoveredByMouse(false)}
+            onMouseEnter={(e) => {
+              e.stopPropagation();
+              setIsHoveredByMouse(true);
+            }}
+            onMouseLeave={(e) => {
+              e.stopPropagation();
+              setIsHoveredByMouse(false);
+            }}
           >
             {renderContent()}
             
