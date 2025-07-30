@@ -76,6 +76,11 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
   const removeSection = (sectionId: string) => {
     if (!cvData) return;
     
+    // Don't remove if it's the only top-level section
+    if (cvData.sections.length === 1 && cvData.sections[0].id === sectionId) {
+      return;
+    }
+    
     const removeSectionRecursive = (sections: Section[]): Section[] => {
       return sections
         .filter(section => section.id !== sectionId)
@@ -90,6 +95,17 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
       sections: removeSectionRecursive(cvData.sections)
     };
     saveCVData(updatedData);
+  };
+
+  const canRemoveSection = (sectionId: string): boolean => {
+    if (!cvData) return false;
+    
+    // Can't remove if it's the only top-level section
+    if (cvData.sections.length === 1 && cvData.sections[0].id === sectionId) {
+      return false;
+    }
+    
+    return true;
   };
 
   const addSection = (parentId: string, direction: 'horizontal' | 'vertical') => {
@@ -191,6 +207,7 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
               onUpdate={updateSection}
               onAddSection={addSection}
               onRemoveSection={removeSection}
+              canRemove={canRemoveSection(section.id)}
               onMouseEnterOrExit={handleDummyMouseEnterOrExit}
             />
           ))}

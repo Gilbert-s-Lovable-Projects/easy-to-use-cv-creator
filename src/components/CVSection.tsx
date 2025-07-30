@@ -29,10 +29,11 @@ interface CVSectionProps {
   onUpdate: (sectionId: string, updates: Partial<Section>) => void;
   onAddSection: (parentId: string, direction: 'horizontal' | 'vertical') => void;
   onRemoveSection: (sectionId: string) => void;
+  canRemove?: boolean;
   onMouseEnterOrExit: (state: 'mouseEnter' | 'mouseExit') => void;
 }
 
-export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, onMouseEnterOrExit }: CVSectionProps) => {
+export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, canRemove = true, onMouseEnterOrExit }: CVSectionProps) => {
   const [showTextDialog, setShowTextDialog] = useState(false);
   const [showStyleDialog, setShowStyleDialog] = useState(false);
   const [textContent, setTextContent] = useState(section.content);
@@ -181,6 +182,7 @@ export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, on
                     onUpdate={onUpdate}
                     onAddSection={onAddSection}
                     onRemoveSection={onRemoveSection}
+                    canRemove={true}
                     onMouseEnterOrExit={onMouseEnterOrExitChildSection}
                   />
                 ))}
@@ -211,7 +213,11 @@ export const CVSection = ({ section, onUpdate, onAddSection, onRemoveSection, on
             Split Vertical
           </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={handleRemoveSection} className="text-destructive focus:text-destructive">
+          <ContextMenuItem 
+            onClick={handleRemoveSection} 
+            className="text-destructive focus:text-destructive"
+            disabled={!canRemove}
+          >
             <Trash2 className="h-4 w-4 mr-2" />
             Remove Section
           </ContextMenuItem>
