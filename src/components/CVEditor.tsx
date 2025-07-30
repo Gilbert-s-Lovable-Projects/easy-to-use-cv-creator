@@ -126,27 +126,26 @@ export const CVEditor = ({ selectedCVId }: CVEditorProps) => {
       children: []
     };
 
-    const addSectionRecursive = (sections: Section[]): Section[] => {
-      return sections.map(section => {
-        if (section.id === parentId) {
-          return {
-            ...section,
-            children: [...section.children, newSection]
-          };
-        }
-        if (section.children.length > 0) {
-          return {
-            ...section,
-            children: addSectionRecursive(section.children)
-          };
-        }
-        return section;
-      });
+    const addSectionAsSibling = (sections: Section[], targetId: string): Section[] => {
+      // Check if target is in current level
+      const targetIndex = sections.findIndex(s => s.id === targetId);
+      if (targetIndex !== -1) {
+        // Insert new section as sibling
+        const newSections = [...sections];
+        newSections.splice(targetIndex + 1, 0, newSection);
+        return newSections;
+      }
+      
+      // Search in children
+      return sections.map(section => ({
+        ...section,
+        children: addSectionAsSibling(section.children, targetId)
+      }));
     };
 
     const updatedData = {
       ...cvData,
-      sections: addSectionRecursive(cvData.sections)
+      sections: addSectionAsSibling(cvData.sections, parentId)
     };
     saveCVData(updatedData);
   };
