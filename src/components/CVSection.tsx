@@ -28,15 +28,17 @@ interface CVSectionProps {
   section: Section;
   onUpdate: (sectionId: string, updates: Partial<Section>) => void;
   onAddSection: (parentId: string, direction: 'horizontal' | 'vertical') => void;
+  onMouseEnterOrExit: (state: 'mouseEnter' | 'mouseExit') => void;
 }
 
-export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) => {
+export const CVSection = ({ section, onUpdate, onAddSection, onMouseEnterOrExit }: CVSectionProps) => {
   const [showTextDialog, setShowTextDialog] = useState(false);
   const [showStyleDialog, setShowStyleDialog] = useState(false);
   const [textContent, setTextContent] = useState(section.content);
   const [backgroundColor, setBackgroundColor] = useState(section.styles.backgroundColor || '#000000FF');
   const [backgroundOpacity, setBackgroundOpacity] = useState(1.0);
   const [isHoveredByMouse, setIsHoveredByMouse] = useState(false);
+  const [isChildSectionHoveredByMouse, setIsChildSectionHoveredByMouse] = useState(false);
   const [padding, setPadding] = useState(section.styles.padding);
   const [margin, setMargin] = useState(section.styles.margin);
   const [borderStyle, setBorderStyle] = useState(section.styles.borderStyle || 'none');
@@ -44,7 +46,11 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
   const [borderColor, setBorderColor] = useState(section.styles.borderColor || '#000000');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const finalBackgroundColor = isHoveredByMouse
+  const onMouseEnterOrExitChildSection = (state: 'mouseEnter' | 'mouseExit') => {
+    setIsChildSectionHoveredByMouse(state === 'mouseEnter');
+  };
+
+  const finalBackgroundColor = isHoveredByMouse && !isChildSectionHoveredByMouse
     ? tinycolor(backgroundColor).darken(20).toString()
     : backgroundColor;
 
@@ -150,10 +156,12 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
             onMouseEnter={(e) => {
               e.stopPropagation();
               setIsHoveredByMouse(true);
+              onMouseEnterOrExit('mouseEnter');
             }}
             onMouseLeave={(e) => {
               e.stopPropagation();
               setIsHoveredByMouse(false);
+              onMouseEnterOrExit('mouseExit');
             }}
           >
             {renderContent()}
@@ -167,6 +175,7 @@ export const CVSection = ({ section, onUpdate, onAddSection }: CVSectionProps) =
                     section={child}
                     onUpdate={onUpdate}
                     onAddSection={onAddSection}
+                    onMouseEnterOrExit={onMouseEnterOrExitChildSection}
                   />
                 ))}
               </div>
